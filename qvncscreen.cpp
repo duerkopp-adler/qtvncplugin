@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "qvncscreen.h"
+#include "qvncopenglcontext.h"
 #include "qvnc_p.h"
 #include <QtFbSupport/private/qfbwindow_p.h>
 #include <QtFbSupport/private/qfbcursor_p.h>
@@ -71,7 +72,7 @@ bool QVncScreen::initialize()
     QRegularExpression depthRx(QLatin1String("depth=(\\d+)"));
 
     mGeometry = QRect(0, 0, 1024, 768);
-    mFormat = QImage::Format_ARGB32_Premultiplied;
+    mFormat = QImage::Format_RGBA8888;
     mDepth = 32;
     mPhysicalSize = QSizeF(mGeometry.width()/96.*25.4, mGeometry.height()/96.*25.4);
 
@@ -209,6 +210,34 @@ bool QVncScreen::swapBytes() const
 QFbScreen::Flags QVncScreen::flags() const
 {
     return QFbScreen::DontForceFirstWindowToFullScreen;
+}
+
+QPlatformOpenGLContext *QVncScreen::platformContext() const
+{
+    if (!m_platformContext) {
+        QVncScreen *that = const_cast<QVncScreen *>(this);
+        that->createAndSetPlatformContext();
+    }
+    return m_platformContext;
+}
+
+void QVncScreen::createAndSetPlatformContext() const {
+    const_cast<QVncScreen *>(this)->createAndSetPlatformContext();
+}
+
+void QVncScreen::createAndSetPlatformContext()
+{
+    QSurfaceFormat platformFormat;
+    platformFormat.setDepthBufferSize(24);
+    platformFormat.setStencilBufferSize(8);
+    platformFormat.setRedBufferSize(8);
+    platformFormat.setGreenBufferSize(8);
+    platformFormat.setBlueBufferSize(8);
+    platformFormat.setRenderableType(QSurfaceFormat::RenderableType::OpenGL);
+    platformFormat.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
+
+    QVncOpenGLContext *platformContext = new QVncOpenGLContext(platformFormat);
+    m_platformContext = platformContext;
 }
 
 QT_END_NAMESPACE

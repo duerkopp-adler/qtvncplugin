@@ -15,15 +15,19 @@ SOURCES = \
     qvncintegration.cpp \
     qvncscreen.cpp \
     qvnc.cpp \
-    qvncclient.cpp
+    qvncclient.cpp \
+    qvncopenglcontext.cpp
 
 HEADERS = \
     qvncintegration.h \
     qvncscreen.h \
     qvnc_p.h \
-    qvncclient.h
+    qvncclient.h \
+    qvncopenglcontext.h
 
 OTHER_FILES += vnc.json
+
+LIBS += -lOSMesa
 
 PLUGIN_TYPE = platforms
 PLUGIN_CLASS_NAME = QVncIntegrationPlugin

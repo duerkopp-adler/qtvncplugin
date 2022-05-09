@@ -105,6 +105,7 @@ bool QVncIntegration::hasCapability(QPlatformIntegration::Capability cap) const
     switch (cap) {
     case ThreadedPixmaps: return true;
     case WindowManagement: return false;
+    case OpenGL: return true;
     default: return QPlatformIntegration::hasCapability(cap);
     }
 }
@@ -117,6 +118,11 @@ QPlatformBackingStore *QVncIntegration::createPlatformBackingStore(QWindow *wind
 QPlatformWindow *QVncIntegration::createPlatformWindow(QWindow *window) const
 {
     return new QFbWindow(window);
+}
+
+QPlatformOpenGLContext *QVncIntegration::createPlatformOpenGLContext(QOpenGLContext *context) const
+{
+    return static_cast<QVncScreen *>(context->screen()->handle())->platformContext();
 }
 
 QAbstractEventDispatcher *QVncIntegration::createEventDispatcher() const

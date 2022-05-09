@@ -44,6 +44,7 @@
 
 QT_BEGIN_NAMESPACE
 
+class QPlatformOpenGLContext;
 class QPainter;
 class QFbCursor;
 class QTcpSocket;
@@ -78,6 +79,10 @@ public:
     bool swapBytes() const;
 #endif
 
+    QPlatformOpenGLContext *platformContext() const;
+    void createAndSetPlatformContext() const;
+    void createAndSetPlatformContext();
+
     QStringList mArgs;
 
     qreal dpiX = 96;
@@ -89,6 +94,7 @@ public:
 #if QT_CONFIG(cursor)
     QVncClientCursor *clientCursor = nullptr;
 #endif
+    QPlatformOpenGLContext *m_platformContext = nullptr;
 };
 
 QT_END_NAMESPACE
