@@ -39,7 +39,7 @@
 
 #include "qvncintegration.h"
 #include "qvncscreen.h"
-#include "qvncopenglcontext.h"
+#include "qvncwindow.h"
 #include "qvnc_p.h"
 
 #include <QtFontDatabaseSupport/private/qgenericunixfontdatabase_p.h>
@@ -118,7 +118,7 @@ QPlatformBackingStore *QVncIntegration::createPlatformBackingStore(QWindow *wind
 
 QPlatformWindow *QVncIntegration::createPlatformWindow(QWindow *window) const
 {
-    return new QFbWindow(window);
+    return new QVncWindow(window);
 }
 
 QPlatformOpenGLContext *QVncIntegration::createPlatformOpenGLContext(QOpenGLContext *context) const

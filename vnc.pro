@@ -17,7 +17,8 @@ SOURCES = \
     qvncscreen.cpp \
     qvnc.cpp \
     qvncclient.cpp \
-    qvncopenglcontext.cpp
+    qvncopenglcontext.cpp \
+    qvncwindow.cpp
 
 HEADERS = \
     qrfbpngencoder.h \
@@ -25,7 +26,8 @@ HEADERS = \
     qvncscreen.h \
     qvnc_p.h \
     qvncclient.h \
-    qvncopenglcontext.h
+    qvncopenglcontext.h \
+    qvncwindow.h
 
 OTHER_FILES += vnc.json
 
