@@ -28,7 +28,7 @@ QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
     d->format.setRedBufferSize(8);
     d->format.setGreenBufferSize(8);
     d->format.setBlueBufferSize(8);
-    d->format.setVersion(format.majorVersion(), format.minorVersion());
+    d->format.setVersion(3, 2);
     d->format.setRenderableType(QSurfaceFormat::RenderableType::OpenGL);
     d->format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 
