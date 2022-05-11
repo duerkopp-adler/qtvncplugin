@@ -1,7 +1,12 @@
 #include "qvncopenglcontext.h"
+#include "qvncscreen.h"
 
 #include <qdebug.h>
 #include <qpa/qplatformsurface.h>
+#include <qpa/qplatformscreen.h>
+#include <qopenglcontext.h>
+#include <qscreen.h>
+#include <qcoreapplication.h>
 #include <GL/osmesa.h>
 
 QT_BEGIN_NAMESPACE
@@ -11,7 +16,8 @@ class QVncOpenGLContextData
 public:
     QSurfaceFormat format;
     OSMesaContext mesaContext = nullptr;
-    GLubyte* buffer = nullptr;
+    QImage surfaceImage;
+    void (*glFinish) () = nullptr;
 };
 
 QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
@@ -30,34 +36,34 @@ QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
        0
     };
     d->mesaContext = OSMesaCreateContextAttribs(attribs, NULL);
+
+    d->glFinish = OSMesaGetProcAddress("glFinish");
 }
 
 QVncOpenGLContext::~QVncOpenGLContext()
 {
     OSMesaDestroyContext(d->mesaContext);
-    if (d->buffer)
-    {
-        free(d->buffer);
-    }
 }
 
 bool QVncOpenGLContext::makeCurrent(QPlatformSurface* surface)
 {
     QSize size = surface->surface()->size();
-
-    d->buffer = (GLubyte*) malloc(size.width() * size.height() * 4 * sizeof(GLubyte));
-    return OSMesaMakeCurrent(d->mesaContext, d->buffer, GL_UNSIGNED_BYTE, size.width(), size.height());
+    const QScreen *screen = context()->screen();
+    d->surfaceImage = QImage(size,  screen->handle()->format());
+    return OSMesaMakeCurrent(d->mesaContext, d->surfaceImage.bits(), GL_UNSIGNED_BYTE, size.width(), size.height());
 }
 
 void QVncOpenGLContext::doneCurrent()
 {
-    free(d->buffer);
-    d->buffer = nullptr;
+
 }
 
 void QVncOpenGLContext::swapBuffers(QPlatformSurface* surface)
 {
-    Q_UNUSED(surface)
+    QVncScreen *screen = static_cast<QVncScreen*>(surface->screen());
+    screen->setDirty(screen->geometry());
+    QEvent request(QEvent::UpdateRequest);
+    QCoreApplication::sendEvent(screen, &request);
 }
 
 QFunctionPointer QVncOpenGLContext::getProcAddress(const char* procName)
@@ -68,6 +74,20 @@ QFunctionPointer QVncOpenGLContext::getProcAddress(const char* procName)
 QSurfaceFormat QVncOpenGLContext::format() const
 {
     return d->format;
+}
+
+QImage QVncOpenGLContext::image() const
+{
+    if (d->surfaceImage.isNull())
+    {
+        return QImage();
+    }
+
+    d->glFinish();
+
+    const QSize screenSize = context()->screen()->size();
+    QImage screenImage(d->surfaceImage.mirrored(false, true).copy(0, 0, screenSize.width(), screenSize.height()));
+    return screenImage;
 }
 
 bool QVncOpenGLContext::isSharing() const
