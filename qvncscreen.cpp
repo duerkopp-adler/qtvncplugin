@@ -214,30 +214,16 @@ QFbScreen::Flags QVncScreen::flags() const
 
 QPlatformOpenGLContext *QVncScreen::platformContext() const
 {
-    if (!m_platformContext) {
-        QVncScreen *that = const_cast<QVncScreen *>(this);
-        that->createAndSetPlatformContext();
-    }
     return m_platformContext;
 }
 
-void QVncScreen::createAndSetPlatformContext() const {
-    const_cast<QVncScreen *>(this)->createAndSetPlatformContext();
+void QVncScreen::createAndSetPlatformContext(const QSurfaceFormat& format) const {
+    const_cast<QVncScreen *>(this)->createAndSetPlatformContext(format);
 }
 
-void QVncScreen::createAndSetPlatformContext()
+void QVncScreen::createAndSetPlatformContext(const QSurfaceFormat& format)
 {
-    QSurfaceFormat platformFormat;
-    platformFormat.setDepthBufferSize(24);
-    platformFormat.setStencilBufferSize(8);
-    platformFormat.setRedBufferSize(8);
-    platformFormat.setGreenBufferSize(8);
-    platformFormat.setBlueBufferSize(8);
-    platformFormat.setRenderableType(QSurfaceFormat::RenderableType::OpenGL);
-    platformFormat.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
-
-    QVncOpenGLContext *platformContext = new QVncOpenGLContext(platformFormat);
-    m_platformContext = platformContext;
+    m_platformContext = new QVncOpenGLContext(format);
 }
 
 QT_END_NAMESPACE

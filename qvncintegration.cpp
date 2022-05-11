@@ -39,6 +39,7 @@
 
 #include "qvncintegration.h"
 #include "qvncscreen.h"
+#include "qvncopenglcontext.h"
 #include "qvnc_p.h"
 
 #include <QtFontDatabaseSupport/private/qgenericunixfontdatabase_p.h>
@@ -122,7 +123,9 @@ QPlatformWindow *QVncIntegration::createPlatformWindow(QWindow *window) const
 
 QPlatformOpenGLContext *QVncIntegration::createPlatformOpenGLContext(QOpenGLContext *context) const
 {
-    return static_cast<QVncScreen *>(context->screen()->handle())->platformContext();
+    QVncScreen *screen = static_cast<QVncScreen *>(context->screen()->handle());
+    screen->createAndSetPlatformContext(context->format());
+    return screen->platformContext();
 }
 
 QAbstractEventDispatcher *QVncIntegration::createEventDispatcher() const

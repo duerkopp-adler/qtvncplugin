@@ -80,8 +80,8 @@ public:
 #endif
 
     QPlatformOpenGLContext *platformContext() const;
-    void createAndSetPlatformContext() const;
-    void createAndSetPlatformContext();
+    void createAndSetPlatformContext(const QSurfaceFormat& format) const;
+    void createAndSetPlatformContext(const QSurfaceFormat& format);
 
     QStringList mArgs;
 

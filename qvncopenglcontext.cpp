@@ -23,16 +23,23 @@ public:
 QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
     : d(new QVncOpenGLContextData)
 {
-    d->format = format;
+    d->format.setDepthBufferSize(format.depthBufferSize());
+    d->format.setStencilBufferSize(format.stencilBufferSize());
+    d->format.setRedBufferSize(8);
+    d->format.setGreenBufferSize(8);
+    d->format.setBlueBufferSize(8);
+    d->format.setVersion(format.majorVersion(), format.minorVersion());
+    d->format.setRenderableType(QSurfaceFormat::RenderableType::OpenGL);
+    d->format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 
-    static const int attribs[] = {
+    const int attribs[] = {
        OSMESA_FORMAT,                 OSMESA_RGBA,
-       OSMESA_DEPTH_BITS,             24,
-       OSMESA_STENCIL_BITS,           8,
+       OSMESA_DEPTH_BITS,             format.depthBufferSize(),
+       OSMESA_STENCIL_BITS,           format.stencilBufferSize(),
        OSMESA_ACCUM_BITS,             0,
        OSMESA_PROFILE,                OSMESA_CORE_PROFILE,
-       OSMESA_CONTEXT_MAJOR_VERSION,  4,
-       OSMESA_CONTEXT_MINOR_VERSION,  5,
+       OSMESA_CONTEXT_MAJOR_VERSION,  format.majorVersion(),
+       OSMESA_CONTEXT_MINOR_VERSION,  format.minorVersion(),
        0
     };
     d->mesaContext = OSMesaCreateContextAttribs(attribs, NULL);
