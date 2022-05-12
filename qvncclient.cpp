@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "qvncclient.h"
+#include "qrfbpngencoder.h"
 #include "qvnc_p.h"
 
 #include <QtNetwork/QTcpSocket>
@@ -510,6 +511,7 @@ void QVncClient::setEncodings()
         CoRRE = 4,
         Hextile = 5,
         ZRLE = 16,
+        PNG = -260,
         Cursor = -239,
         DesktopSize = -223
     };
@@ -544,6 +546,12 @@ void QVncClient::setEncodings()
                 break;
             case ZRLE:
                 m_supportZRLE = true;
+                break;
+            case PNG:
+                if (!m_encoder) {
+                    m_encoder = new QRfbPngEncoder(this);
+                    qCDebug(lcVnc, "QVncServer::setEncodings: using png");
+                }
                 break;
             case Cursor:
                 m_supportCursor = true;

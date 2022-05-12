@@ -12,6 +12,7 @@ DEFINES += QT_NO_FOREACH
 
 SOURCES = \
     main.cpp \
+    qrfbpngencoder.cpp \
     qvncintegration.cpp \
     qvncscreen.cpp \
     qvnc.cpp \
@@ -19,6 +20,7 @@ SOURCES = \
     qvncopenglcontext.cpp
 
 HEADERS = \
+    qrfbpngencoder.h \
     qvncintegration.h \
     qvncscreen.h \
     qvnc_p.h \
