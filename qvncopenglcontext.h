@@ -20,7 +20,6 @@ public:
     QFunctionPointer getProcAddress(const char *procName) override;
 
     QSurfaceFormat format() const override;
-    QImage image() const;
     bool isSharing() const override;
     bool isValid() const override;
 

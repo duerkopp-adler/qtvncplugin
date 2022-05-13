@@ -18,8 +18,6 @@ class QVncOpenGLContextData
 public:
     QSurfaceFormat format;
     OSMesaContext mesaContext = nullptr;
-    QImage surfaceImage;
-    void (*glFinish) () = nullptr;
 };
 
 QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
@@ -45,8 +43,6 @@ QVncOpenGLContext::QVncOpenGLContext(const QSurfaceFormat& format)
        0
     };
     d->mesaContext = OSMesaCreateContextAttribs(attribs, NULL);
-
-    d->glFinish = OSMesaGetProcAddress("glFinish");
 }
 
 QVncOpenGLContext::~QVncOpenGLContext()
@@ -86,20 +82,6 @@ QFunctionPointer QVncOpenGLContext::getProcAddress(const char* procName)
 QSurfaceFormat QVncOpenGLContext::format() const
 {
     return d->format;
-}
-
-QImage QVncOpenGLContext::image() const
-{
-    if (d->surfaceImage.isNull())
-    {
-        return QImage();
-    }
-
-    d->glFinish();
-
-    const QSize screenSize = context()->screen()->size();
-    QImage screenImage(d->surfaceImage.mirrored(false, true).copy(0, 0, screenSize.width(), screenSize.height()));
-    return screenImage;
 }
 
 bool QVncOpenGLContext::isSharing() const
