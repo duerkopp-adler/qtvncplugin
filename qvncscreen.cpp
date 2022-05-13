@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "qvncscreen.h"
+#include "qvncwindow.h"
 #include "qvncopenglcontext.h"
 #include "qvnc_p.h"
 #include <QtFbSupport/private/qfbwindow_p.h>
@@ -113,14 +114,51 @@ bool QVncScreen::initialize()
 
 QRegion QVncScreen::doRedraw()
 {
-    QRegion touched = QFbScreen::doRedraw();
+    const QPoint screenOffset = mGeometry.topLeft();
 
-    if (touched.isEmpty())
-        return touched;
-    dirtyRegion += touched;
+    QRegion touchedRegion;
+    if (mCursor && mCursor->isDirty() && mCursor->isOnScreen()) {
+        const QRect lastCursor = mCursor->dirtyRect();
+        mRepaintRegion += lastCursor;
+    }
+    if (mRepaintRegion.isEmpty() && (!mCursor || !mCursor->isDirty()))
+        return touchedRegion;
+
+    QPainter painter(&mScreenImage);
+
+    const QRect screenRect = mGeometry.translated(-screenOffset);
+    for (QRect rect : mRepaintRegion) {
+        rect = rect.intersected(screenRect);
+        if (rect.isEmpty())
+            continue;
+
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.fillRect(rect, mScreenImage.hasAlphaChannel() ? Qt::transparent : Qt::black);
+
+        for (int layerIndex = mWindowStack.size() - 1; layerIndex != -1; layerIndex--) {
+            if (!mWindowStack[layerIndex]->window()->isVisible())
+                continue;
+
+            const QRect windowRect = mWindowStack[layerIndex]->geometry().translated(-screenOffset);
+            const QRect windowIntersect = rect.translated(-windowRect.left(), -windowRect.top());
+            QVncWindow *window = static_cast<QVncWindow*>(mWindowStack[layerIndex]);
+            painter.drawImage(rect, *window->image(), windowIntersect);
+        }
+    }
+
+    if (mCursor && (mCursor->isDirty() || mRepaintRegion.intersects(mCursor->lastPainted()))) {
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        touchedRegion += mCursor->drawCursor(painter);
+    }
+    touchedRegion += mRepaintRegion;
+    mRepaintRegion = QRegion();
+
+    if (touchedRegion.isEmpty())
+        return touchedRegion;
+    dirtyRegion += touchedRegion;
 
     vncServer->setDirty();
-    return touched;
+    return touchedRegion;
 }
 
 

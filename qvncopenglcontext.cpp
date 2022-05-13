@@ -6,7 +6,9 @@
 #include <qpa/qplatformscreen.h>
 #include <qopenglcontext.h>
 #include <qscreen.h>
+#include <qvncwindow.h>
 #include <qcoreapplication.h>
+#include <qopenglfunctions.h>
 #include <GL/osmesa.h>
 
 QT_BEGIN_NAMESPACE
@@ -55,9 +57,11 @@ QVncOpenGLContext::~QVncOpenGLContext()
 bool QVncOpenGLContext::makeCurrent(QPlatformSurface* surface)
 {
     QSize size = surface->surface()->size();
-    const QScreen *screen = context()->screen();
-    d->surfaceImage = QImage(size,  screen->handle()->format());
-    return OSMesaMakeCurrent(d->mesaContext, d->surfaceImage.bits(), GL_UNSIGNED_BYTE, size.width(), size.height());
+    QVncWindow *window = static_cast<QVncWindow*>(surface);
+    QImage *image = window->image();
+    *image = QImage(size, context()->screen()->handle()->format());
+    bool ok = OSMesaMakeCurrent(d->mesaContext, image->bits(), GL_UNSIGNED_BYTE, size.width(), size.height());
+    return ok;
 }
 
 void QVncOpenGLContext::doneCurrent()
@@ -67,6 +71,7 @@ void QVncOpenGLContext::doneCurrent()
 
 void QVncOpenGLContext::swapBuffers(QPlatformSurface* surface)
 {
+    context()->functions()->glFinish();
     QVncScreen *screen = static_cast<QVncScreen*>(surface->screen());
     screen->setDirty(screen->geometry());
     QEvent request(QEvent::UpdateRequest);

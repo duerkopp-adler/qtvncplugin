@@ -1,6 +1,5 @@
 #include "qrfbpngencoder.h"
 #include "qvncclient.h"
-#include "qvncopenglcontext.h"
 
 #include <qtcpsocket.h>
 #include <qendian.h>
@@ -40,8 +39,7 @@ void QRfbPngEncoder::write()
     if (rectsInRegion <= 0)
         return;
 
-    QVncOpenGLContext *context = static_cast<QVncOpenGLContext *>(client->server()->screen()->platformContext());
-    const QImage screenImage = context->image();
+   const QImage screenImage = client->server()->screenImage();
 
     for (const QRect &tileRect: rgn) {
         const QRfbRect rect(tileRect.x(), tileRect.y(),
