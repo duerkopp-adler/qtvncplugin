@@ -57,6 +57,11 @@ bool QVncOpenGLContext::makeCurrent(QPlatformSurface* surface)
     QImage *image = window->image();
     *image = QImage(size, context()->screen()->handle()->format());
     bool ok = OSMesaMakeCurrent(d->mesaContext, image->bits(), GL_UNSIGNED_BYTE, size.width(), size.height());
+    if (ok)
+    {
+        // Reverse order of pixel rows
+        OSMesaPixelStore(OSMESA_Y_UP, 0);
+    }
     return ok;
 }
 
